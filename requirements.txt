@@ -1,0 +1,9 @@
+ultralytics
+opencv-python-headless
+pillow
+matplotlib
+scipy
+scikit-learn
+numpy
+python-dotenv
+huggingface-hub
