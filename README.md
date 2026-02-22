@@ -9,7 +9,7 @@ Deployed using Gradio and Hugging Face Spaces.
 ## 🔥 Live Demo
 
 👉 Try the app here:  
-[PASTE YOUR HUGGING FACE LINK]
+https://huggingface.co/spaces/omerfarooq223/parking-detection-system
 
 ---
 
