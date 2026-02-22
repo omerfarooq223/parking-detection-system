@@ -48,7 +48,7 @@ Model weights are hosted on Hugging Face.
 
 ### Image Detection
 
-![Image Result](screenshots/image_result.png)
+![Image Result](screenshots/result1.png)
 
 ---
 
