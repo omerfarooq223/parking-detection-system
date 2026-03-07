@@ -54,7 +54,7 @@ Model weights are hosted on Hugging Face.
 
 ## 📂 Project Structure
 
-'''
+```
 parking-detection-system/
 ├── app.py                  # Main application — Gradio UI + detection logic
 ├── requirements.txt        # Python dependencies
@@ -65,7 +65,7 @@ parking-detection-system/
 │   └── result1.png
 │
 └── samples/                # Sample images/videos for testing
-'''
+```
 
 ---
 
