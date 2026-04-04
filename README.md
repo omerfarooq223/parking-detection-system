@@ -1,169 +1,119 @@
-# 🚗 Smart Parking Detection System
+# Smart Parking Detection System
 
-AI-powered parking analysis for both images and videos, with smart space ranking and a parking assistant chatbot.
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![YOLOv8](https://img.shields.io/badge/YOLOv8-Ultralytics-00CFFD?style=flat-square)](https://github.com/ultralytics/ultralytics)
+[![Gradio](https://img.shields.io/badge/Gradio-UI-FF7C00?style=flat-square&logo=gradio&logoColor=white)](https://gradio.app/)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Hugging%20Face-yellow?style=flat-square&logo=huggingface&logoColor=white)](https://huggingface.co/spaces/omerfarooq223/parking-detection-system)
 
-🔥 Live demo: https://huggingface.co/spaces/omerfarooq223/parking-detection-system
+AI-powered parking lot analysis that detects occupied and free spaces, ranks the best available spots, and answers parking-status queries via a built-in chatbot. Works on both images and video.
 
-## 📌 What This Project Does
+---
 
-The app detects two classes in parking-lot scenes:
-- occupied spots (cars)
-- free spots (empty spaces)
+## Features
 
-After detection, it:
-- assigns zone-based spot IDs
-- calculates occupancy and availability metrics
-- ranks the best empty spaces using a multi-factor scoring system
-- visualizes recommendations, zones, and walking paths from a user-defined entrance
+- **Parking detection** — identifies occupied and free spots using YOLOv8, with adjustable confidence and IoU thresholds
+- **Smart recommendations** — ranks the top 5 empty spots using a multi-factor score: detection confidence, distance to entrance, cluster density (DBSCAN), spot size, local accessibility, and edge penalty
+- **Zone analysis** — overlays a 3×3 grid showing per-zone availability
+- **Entrance-aware ranking** — click to set a custom entrance point; distance is factored into scores
+- **Aggressive detection mode** — for crowded or irregular layouts
+- **Video processing** — frame-skip control to balance speed vs. temporal resolution
+- **Parking assistant chatbot** — answers availability, occupancy, and model questions; uses Hugging Face LLM API if a token is provided, otherwise falls back to rule-based responses
 
-The interface is built with Gradio and includes three tabs:
-- Image Analysis
-- Video Analysis
-- Parking Assistant Chatbot
+---
 
-## ✨ Core Features
+## Requirements
 
-- Image parking-space detection with adjustable confidence and IoU
-- Optional aggressive detection mode for crowded/unsymmetric layouts
-- Zone overlay (3x3 grid) with availability state per zone
-- Top 5 recommended spots with score and distance estimate
-- Entrance-point click support (for distance and ranking context)
-- Video processing with frame skipping for speed/quality control
-- Chatbot that answers parking-status and model/training questions
-- Optional Hugging Face API integration for LLM-powered chatbot responses
+- Python 3.10+
+- `best.pt` — YOLOv8 model weights (required, place in project root)
+- `best2.pt` — second model for ensemble mode (optional)
+- `HF_TOKEN` — Hugging Face API token for LLM-powered chatbot (optional)
 
-## 🎯 How Recommendations Are Ranked
+---
 
-Each empty spot is scored out of 100 using:
-- detection confidence
-- distance to entrance
-- cluster bonus (nearby empty spots via DBSCAN)
-- relative spot size
-- local accessibility (occupied spots nearby)
-- edge penalty for low-quality edge positions
+## Setup
 
-Top spots are shown both visually and in a detailed text panel.
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt
 
-## 🛠️ Tech Stack
+# 2. Add model weights to the project root
+#    best.pt     → required
+#    best2.pt    → optional (enables ensemble mode)
 
-- Python
-- Ultralytics YOLO
-- OpenCV
-- NumPy, SciPy, scikit-learn
-- Matplotlib
-- Gradio
-- python-dotenv
-- huggingface-hub
+# 3. (Optional) Configure chatbot API
+echo "HF_TOKEN=your_huggingface_token" > .env
 
-## 📂 Project Structure
+# 4. Run
+python app.py
+# App starts at http://localhost:7860
+```
 
-parking-detection-system/
-- app.py: main app, detection pipeline, visualization, chatbot, video workflow
-- requirements.txt: Python dependencies
-- README.md: documentation
-- samples/: sample media for testing
-- screenshots/: UI and result images
+---
 
-## ✅ Requirements
+## Usage
 
-- Python 3.10+ recommended
-- model weights file named best.pt in project root (required)
-- optional second model file best2.pt for ensemble mode
-- optional HF_TOKEN environment variable for Hugging Face chatbot API
+### Image Analysis
 
-If best2.pt is missing, the app runs in single-model mode.
+1. Upload a parking lot image
+2. Optionally click the image to set an entrance point (default: bottom-center)
+3. Adjust confidence, IoU, and detection mode as needed
+4. Click **Analyze Image**
 
-## ▶️ Setup
+**Output:** annotated image with spot labels, occupancy metrics, zone overlay, and ranked recommendations.
 
-1. Install dependencies:
-	pip install -r requirements.txt
+### Video Analysis
 
-2. Add model files to the repository root:
-	- best.pt (required)
-	- best2.pt (optional)
+1. Upload a video file
+2. Set **Process Every N Frames** — lower values give more detail, higher values run faster
+3. Click **Process Video**
 
-3. Optional chatbot API setup:
-	create a .env file in project root with:
-	HF_TOKEN=your_huggingface_token
+**Output:** annotated video with per-frame detection and a processing summary.
 
-4. Run:
-	python app.py
+### Chatbot
 
-The app launches on port 7860.
+Analyze an image first, then ask questions about availability, occupancy, or model details. The chatbot uses the most recent analysis as context.
 
-## 📖 Usage Guide
+---
 
-### 📷 Image Analysis Tab
+## How Spot Scoring Works
 
-1. Upload an image.
-2. Click on the image to set entrance location (optional; default is bottom-center).
-3. Configure:
-	- Detection Confidence
-	- IOU Threshold (NMS)
-	- Aggressive Detection Mode
-	- Show Zone Analysis
-	- Show Top Recommendations
-4. Click Analyze Image.
+Each empty spot is scored out of 100 using a weighted combination of:
 
-Outputs:
-- annotated image with occupied/free spots
-- detailed analysis report
-- ranked recommendation list
+| Factor | Description |
+|---|---|
+| Detection confidence | Model certainty for that spot |
+| Distance to entrance | Closer spots score higher |
+| Cluster bonus | More empty neighbors → higher score (via DBSCAN) |
+| Spot size | Larger spots ranked up |
+| Local accessibility | Penalizes spots surrounded by occupied spaces |
+| Edge penalty | Reduces score for low-quality edge detections |
 
-### 🎥 Video Analysis Tab
+---
 
-1. Upload a video.
-2. Configure detection parameters.
-3. Set Process Every N Frames:
-	- lower value: better temporal detail, slower
-	- higher value: faster processing, less detail
-4. Click Process Video.
+## Tech Stack
 
-Outputs:
-- annotated video
-- processing summary and optimization notes
+Python · Ultralytics YOLOv8 · OpenCV · NumPy · SciPy · scikit-learn · Gradio · Hugging Face Hub
 
-### 💬 Chatbot Tab
+---
 
-1. Analyze an image first.
-2. Ask availability, recommendation, occupancy, model, or training questions.
+## Limitations
 
-Behavior:
-- if HF_TOKEN is configured and valid, responses use Hugging Face LLM API
-- otherwise, chatbot uses built-in rule-based fallback responses
+- Detection quality is sensitive to camera angle and image resolution
+- Dense or irregular lots may need aggressive mode enabled
+- Video processing can be slow on long files with low frame-skip values
+- Spot scores are heuristic — not ground truth
 
-## 🧠 Model and Training Information Exposed In App
+---
 
-The app includes and can report:
-- YOLOv8m model metadata
-- training configuration (epochs, batch size, image size)
-- dataset split counts
-- reported precision/recall/mAP metrics
-- model size and inference speed estimates
+## Planned Improvements
 
-## ⚠️ Notes and Limitations
+- Real-time CCTV stream support
+- REST API endpoint for external consumers
+- Multi-lot management dashboard
+- Cross-frame tracking for stable spot IDs in video
 
-- Detection quality depends heavily on camera angle and image quality.
-- Very dense or irregular parking scenes may require aggressive mode.
-- Video analysis can be slow for long files or low frame-skip settings.
-- Recommendations are heuristic scores, not guaranteed ground truth.
+---
 
-## 📷 Screenshots
+## Author
 
-Interface:
-![UI](screenshots/ui.png)
-
-Detection Example:
-![Image Result](screenshots/result1.png)
-
-## 🚀 Future Improvements
-
-- real-time CCTV stream support
-- explicit REST API endpoint for external consumers
-- multi-lot management dashboard
-- model versioning and evaluation report export
-- optional tracking across video frames for more stable IDs
-
-## 👤 Author
-
-Muhammad Umar Farooq
+**Muhammad Umar Farooq** — [GitHub](https://github.com/omerfarooq223)
