@@ -114,6 +114,16 @@ Python · Ultralytics YOLOv8 · OpenCV · NumPy · SciPy · scikit-learn · Grad
 
 ---
 
+## Screenshots
+
+![Interface](screenshots/ui.png)
+*Main interface with image upload, detection controls, and zone overlay*
+
+![Detection Result](screenshots/result1.png)
+*Annotated output showing occupied/free spots, zone analysis, and ranked recommendations*
+
+---
+
 ## Author
 
 **Muhammad Umar Farooq** — [GitHub](https://github.com/omerfarooq223)
